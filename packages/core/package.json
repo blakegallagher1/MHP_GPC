@@ -1,0 +1,22 @@
+{
+  "name": "@mhp-gpc/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts --out-dir dist"
+  },
+  "dependencies": {
+    "@mhp-gpc/config": "workspace:*",
+    "@prisma/client": "^5.16.2",
+    "dotenv": "^16.4.5",
+    "eventemitter3": "^5.0.1",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.2.2"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.2"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "worker",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsup src/index.ts --format cjs --dts --out-dir dist"
+  },
+  "dependencies": {
+    "@mhp-gpc/config": "workspace:*",
+    "@mhp-gpc/core": "workspace:*",
+    "@mhp-gpc/services": "workspace:*",
+    "bullmq": "^4.19.2",
+    "node-cron": "^3.0.3",
+    "pino": "^9.3.2"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.2"
+  }
+}

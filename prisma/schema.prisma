@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [
+    { name = "postgis" }
+  ]
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  ENGAGED
+  QUALIFIED
+  LOST
+}
+
+enum DealStage {
+  INTAKE
+  QUALIFICATION
+  SCREENING
+  DILIGENCE
+  INVESTMENT_COMMITTEE
+  POST_CLOSE
+}
+
+enum BuyBoxStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TouchpointType {
+  CALL
+  EMAIL
+  VISIT
+  MAIL
+  SMS
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETE
+  BLOCKED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Owner {
+  id            String        @id @default(uuid())
+  name          String
+  contactEmail  String?
+  contactPhone  String?
+  mailingStreet String?
+  mailingCity   String?
+  mailingState  String?
+  mailingZip    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  parks         Park[]
+  consents      ConsentLog[]
+}
+
+model Park {
+  id             String      @id @default(uuid())
+  ownerId        String
+  name           String
+  slug           String      @unique
+  addressStreet  String?
+  addressCity    String?
+  addressState   String?
+  addressZip     String?
+  latitude       Float?
+  longitude      Float?
+  location       Unsupported("geometry(Point,4326)")?
+  padCount       Int?
+  occupancyRate  Decimal?    @db.Decimal(5, 2)
+  avgRent        Decimal?    @db.Decimal(10, 2)
+  utilitiesSetup String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  owner          Owner       @relation(fields: [ownerId], references: [id])
+  leads          Lead[]
+  documents      Document[]
+  @@index([ownerId])
+}
+
+model Lead {
+  id            String        @id @default(uuid())
+  parkId        String
+  source        String
+  status        LeadStatus    @default(NEW)
+  priority      Int           @default(0)
+  stage         DealStage     @default(INTAKE)
+  assignedTo    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  park          Park          @relation(fields: [parkId], references: [id])
+  deals         Deal[]
+  touchpoints   Touchpoint[]
+}
+
+model Deal {
+  id                String            @id @default(uuid())
+  leadId            String
+  stage             DealStage         @default(INTAKE)
+  offerPrice        Decimal?          @db.Decimal(14, 2)
+  targetCapRate     Decimal?          @db.Decimal(6, 3)
+  noi               Decimal?          @db.Decimal(14, 2)
+  dscr              Decimal?          @db.Decimal(6, 3)
+  targetCloseDate   DateTime?
+  buyBoxStatus      BuyBoxStatus      @default(PENDING)
+  dealScore         Int?              @default(0)
+  underwritingNotes String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  lead              Lead              @relation(fields: [leadId], references: [id])
+  tasks             Task[]
+  documents         Document[]
+  riskAssessments   RiskAssessment[]
+  decisionLogs      DecisionLog[]
+  scenarioRuns      ScenarioEvaluation[]
+}
+
+model Touchpoint {
+  id          String         @id @default(uuid())
+  leadId      String
+  type        TouchpointType
+  subject     String
+  notes       String?
+  performedAt DateTime       @default(now())
+  author      String?
+  createdAt   DateTime       @default(now())
+  lead        Lead           @relation(fields: [leadId], references: [id])
+  @@index([leadId, performedAt])
+}
+
+model Document {
+  id           String      @id @default(uuid())
+  dealId       String?
+  parkId       String?
+  category     String
+  storageKey   String
+  version      Int         @default(1)
+  checksum     String?
+  isSensitive  Boolean     @default(false)
+  uploadedBy   String?
+  uploadedAt   DateTime    @default(now())
+  deal         Deal?       @relation(fields: [dealId], references: [id])
+  park         Park?       @relation(fields: [parkId], references: [id])
+  metadata     Json?
+}
+
+model Task {
+  id          String      @id @default(uuid())
+  dealId      String
+  title       String
+  description String?
+  status      TaskStatus  @default(PENDING)
+  dueDate     DateTime?
+  assignedTo  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deal        Deal        @relation(fields: [dealId], references: [id])
+  checklist   String?
+  @@unique([dealId, title])
+}
+
+model RiskAssessment {
+  id          String     @id @default(uuid())
+  dealId      String
+  score       Int
+  riskLevel   RiskLevel
+  notes       String?
+  assessedAt  DateTime   @default(now())
+  assessedBy  String?
+  deal        Deal       @relation(fields: [dealId], references: [id])
+}
+
+model DecisionLog {
+  id         String   @id @default(uuid())
+  dealId     String
+  decision   String
+  rationale  String
+  author     String
+  recordedAt DateTime @default(now())
+  deal       Deal     @relation(fields: [dealId], references: [id])
+}
+
+model ConsentLog {
+  id        String   @id @default(uuid())
+  ownerId   String
+  channel   String
+  granted   Boolean  @default(false)
+  metadata  Json?
+  recordedAt DateTime @default(now())
+  owner     Owner    @relation(fields: [ownerId], references: [id])
+  @@index([ownerId, channel])
+}
+
+model ScenarioEvaluation {
+  id        String   @id @default(uuid())
+  dealId    String
+  name      String
+  inputs    Json
+  results   Json
+  createdAt DateTime @default(now())
+  deal      Deal     @relation(fields: [dealId], references: [id])
+}
