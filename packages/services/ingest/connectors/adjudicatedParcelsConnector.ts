@@ -1,13 +1,14 @@
 import { ArcGisConnector } from "./arcGisConnector";
+import type { Geometry } from "geojson";
 import type { ConnectorContext } from "../types";
 
-export interface AdjudicatedParcelRecord {
+export interface AdjudicatedParcelRecord extends Record<string, unknown> {
   adjudicated_id: string;
   parcel_id?: string;
   status?: string;
   auction_date?: string;
   minimum_bid?: number;
-  geometry?: GeoJSON.Geometry;
+  geometry?: Geometry;
 }
 
 export class AdjudicatedParcelsConnector extends ArcGisConnector<AdjudicatedParcelRecord> {

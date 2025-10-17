@@ -13,7 +13,7 @@ export abstract class BaseConnector<T> implements EndpointConnector<T> {
   protected readonly endpointUrl: string;
 
   constructor(protected readonly options: BaseConnectorOptions<T>) {
-    this.httpClient = options.context.httpClient as HttpClient;
+    this.httpClient = options.context.httpClient;
     this.endpointUrl = `${options.context.endpoint.baseUrl}/${options.resourcePath}`.replace(/\/+/g, "/");
   }
 
@@ -67,7 +67,7 @@ export abstract class BaseConnector<T> implements EndpointConnector<T> {
   }
 
   protected buildRequestOptions(query: ConnectorQuery, pagination: Required<Pagination>): HttpPageRequestOptions {
-    const params: Record<string, unknown> = {
+    const params: Record<string, string | number | boolean | undefined> = {
       limit: pagination.limit,
       offset: pagination.offset,
       ...query.filters,

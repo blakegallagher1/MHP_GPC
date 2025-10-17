@@ -1,7 +1,8 @@
 import { ArcGisConnector } from "./arcGisConnector";
+import type { Geometry } from "geojson";
 import type { ConnectorContext } from "../types";
 
-export interface TaxParcelRecord {
+export interface TaxParcelRecord extends Record<string, unknown> {
   parcel_id: string;
   owner_name?: string;
   situs_address?: string;
@@ -9,7 +10,7 @@ export interface TaxParcelRecord {
   improvement_value?: number;
   total_value?: number;
   updated_at?: string;
-  geometry?: GeoJSON.Geometry;
+  geometry?: Geometry;
 }
 
 export class TaxParcelConnector extends ArcGisConnector<TaxParcelRecord> {
