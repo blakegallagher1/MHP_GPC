@@ -1,12 +1,13 @@
 import { ArcGisConnector } from "./arcGisConnector";
+import type { Geometry } from "geojson";
 import type { ConnectorContext } from "../types";
 
-export interface ZoningRecord {
+export interface ZoningRecord extends Record<string, unknown> {
   zoning_id: string;
   zoning_type?: string;
   overlay?: string;
   effective_date?: string;
-  geometry?: GeoJSON.Geometry;
+  geometry?: Geometry;
 }
 
 export class ZoningConnector extends ArcGisConnector<ZoningRecord> {

@@ -1,3 +1,5 @@
+import type { FeatureCollection, Geometry } from "geojson";
+
 export interface ObjectStorageLocation {
   bucket: string;
   key: string;
@@ -27,7 +29,10 @@ export class ParquetWriter {
 export class GeoJsonWriter {
   constructor(private readonly client: ObjectStorageClient, private readonly options: GeoJsonWriterOptions = {}) {}
 
-  async write(location: ObjectStorageLocation, features: GeoJSON.FeatureCollection): Promise<void> {
+  async write<G extends Geometry | null = Geometry>(
+    location: ObjectStorageLocation,
+    features: FeatureCollection<G>,
+  ): Promise<void> {
     const payload = JSON.stringify({ name: this.options.featureCollectionName, ...features });
     await this.client.putObject(location, payload);
   }

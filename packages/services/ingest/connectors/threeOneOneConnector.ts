@@ -1,7 +1,7 @@
 import { SocrataConnector } from "./socrataConnector";
 import type { ConnectorContext } from "../types";
 
-export interface ThreeOneOneRecord {
+export interface ThreeOneOneRecord extends Record<string, unknown> {
   request_id: string;
   category?: string;
   status?: string;

@@ -1,7 +1,7 @@
 import { SocrataConnector } from "./socrataConnector";
 import type { ConnectorContext } from "../types";
 
-export interface Re5cHrw9Record {
+export interface Re5cHrw9Record extends Record<string, unknown> {
   service_request_id: string;
   status: string;
   service_name: string;

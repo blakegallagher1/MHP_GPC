@@ -1,24 +1,19 @@
 import type { EndpointConfig } from "../../config/ingest";
-import type { HttpClientResponse } from "../../core/http/httpClient";
+import type { Geometry } from "geojson";
+import type { HttpClient } from "../../core/http/httpClient";
+import type { RetryOptions } from "../../core/retry/exponentialBackoff";
 
 export interface Pagination { limit?: number; offset?: number; page?: number; }
 
 export interface GeometryQuery {
-  geometry?: GeoJSON.Geometry;
+  geometry?: Geometry;
   spatialRel?: "intersects" | "contains" | "within";
 }
 
 export interface ConnectorContext {
   endpoint: EndpointConfig;
-  httpClient: {
-    get<T>(url: string, options?: Record<string, unknown>): Promise<HttpClientResponse<T>>;
-  };
-  retryOptions: {
-    retries: number;
-    factor?: number;
-    minTimeoutMs?: number;
-    maxTimeoutMs?: number;
-  };
+  httpClient: HttpClient;
+  retryOptions: RetryOptions;
 }
 
 export interface ConnectorResult<T> {

@@ -1,3 +1,4 @@
+import type { Feature, FeatureCollection, Geometry } from "geojson";
 import type { ObjectStorageClient } from "../../../core/storage/objectStorage";
 import type { Logger } from "../../../core/logging/logger";
 import type { CacheManager } from "../cache/cacheManager";
@@ -34,13 +35,19 @@ export class IngestJob<T extends Record<string, unknown>> {
 
     await writers.parquet.write(parquetLocation, result.rows);
 
-    const geojsonFeatureCollection: GeoJSON.FeatureCollection = {
-      type: "FeatureCollection",
-      features: result.rows.map((row) => ({
+    const features: Array<Feature<Geometry | null>> = result.rows.map((row) => {
+      const { geometry, ...properties } = row as Record<string, unknown> & { geometry?: unknown };
+      const featureGeometry: Geometry | null = (geometry as Geometry | undefined) ?? null;
+      return {
         type: "Feature",
-        geometry: (row.geometry as GeoJSON.Geometry) ?? null,
-        properties: { ...row, geometry: undefined },
-      })),
+        geometry: featureGeometry,
+        properties,
+      } satisfies Feature<Geometry | null>;
+    });
+
+    const geojsonFeatureCollection: FeatureCollection<Geometry | null> = {
+      type: "FeatureCollection",
+      features,
     };
 
     await writers.geojson.write(geoJsonLocation, geojsonFeatureCollection);
