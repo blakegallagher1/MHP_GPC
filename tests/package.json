@@ -8,6 +8,6 @@
   },
   "dependencies": {
     "@mhp-gpc/services": "workspace:*",
-    "vitest": "^1.6.0"
+    "vitest": "^4.1.0"
   }
 }
